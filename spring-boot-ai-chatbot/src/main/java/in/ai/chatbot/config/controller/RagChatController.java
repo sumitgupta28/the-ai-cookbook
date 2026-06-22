@@ -50,7 +50,7 @@ public class RagChatController {
             return Flux.just(ctx.shortCircuitMessage());
         }
         return chatModel.stream(buildPrompt(message, ctx.systemPrompt()))
-
+                .filter(cr -> cr.getResult() != null && cr.getResult().getOutput() != null)
                 .map(cr -> {
                     String text = cr.getResult().getOutput().getText();
                     return text != null ? text : "";

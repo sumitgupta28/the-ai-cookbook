@@ -10,12 +10,19 @@ description = 'Your friendly personal assistant powered by Ollama (default) or A
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
 repositories {
 	mavenCentral()
+}
+
+configurations.all {
+	// Embeddings run via onnxruntime; DJL is only used for the HuggingFace tokenizer.
+	// The transitive DJL PyTorch engine is unused but eagerly tries to download a native
+	// library on startup, which fails behind the corporate proxy. Exclude it.
+	exclude group: 'ai.djl.pytorch', module: 'pytorch-engine'
 }
 
 ext {

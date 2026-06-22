@@ -25,6 +25,7 @@ public class ChatController {
         Prompt prompt = new Prompt(new UserMessage(message));
         log.debug("[/ai/chat] Dispatching prompt to model");
         return chatModel.stream(prompt)
+                .filter(cr -> cr.getResult() != null && cr.getResult().getOutput() != null)
                 .doOnNext(cr -> {
                     String text = cr.getResult().getOutput().getText();
                     log.debug("[/ai/chat] Chunk received: '{}'", text);
@@ -39,6 +40,7 @@ public class ChatController {
         Prompt prompt = new Prompt(new UserMessage(message));
         log.debug("[/ai/chat/string] Dispatching prompt to model");
         return chatModel.stream(prompt)
+                .filter(cr -> cr.getResult() != null && cr.getResult().getOutput() != null)
                 .doOnNext(cr -> log.debug("[/ai/chat/string] Raw chunk from model: '{}'", cr.getResult().getOutput().getText()))
                 .map(cr -> {
                     String text = cr.getResult().getOutput().getText();
