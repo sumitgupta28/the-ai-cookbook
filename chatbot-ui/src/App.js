@@ -27,6 +27,9 @@ function App() {
                     <button className={tabClass('chat')} onClick={() => setTab('chat')}>
                         💬 Chat
                     </button>
+                    <button className={tabClass('docs')} onClick={() => setTab('docs')}>
+                        📄 Documents
+                    </button>
                     <button className={tabClass('vector')} onClick={() => setTab('vector')}>
                         🗄️ Vector Search
                     </button>
@@ -35,9 +38,6 @@ function App() {
                     </button>
                     <button className={tabClass('rag-memory')} onClick={() => setTab('rag-memory')}>
                         🧠 RAG + Memory
-                    </button>
-                    <button className={tabClass('docs')} onClick={() => setTab('docs')}>
-                        📄 Documents
                     </button>
                     <button className={tabClass('tools')} onClick={() => setTab('tools')}>
                         🔧 Tool Agent

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { IoMdSend } from 'react-icons/io';
 import { useStreamingChat } from './useStreamingChat';
+import MarkdownMessage from './MarkdownMessage';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
@@ -398,7 +399,7 @@ const RAGChatbotWithMemory = () => {
                                         : 'bg-gray-200 text-black'
                                 }`}
                             >
-                                {msg.text}
+                                {msg.sender === 'user' ? msg.text : <MarkdownMessage text={msg.text} />}
                                 {msg.streaming && (
                                     <span className="inline-block w-0.5 h-4 bg-gray-500 ml-0.5 align-middle animate-pulse" />
                                 )}

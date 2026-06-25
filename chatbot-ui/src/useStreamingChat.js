@@ -62,11 +62,15 @@ export function useStreamingChat({ onComplete } = {}) {
                 buffer = parts.pop(); // keep incomplete trailing segment
 
                 for (const part of parts) {
-                    for (const line of part.split('\n')) {
-                        if (line.startsWith('data:')) {
-                            appendToken(line.slice(5));
-                        }
-                    }
+                    // SSE spec: a single event's multiple `data:` lines are re-joined with '\n'.
+                    // Spring encodes newline-containing tokens as multiple data lines, so this
+                    // restores the line breaks markdown tables/headings/lists depend on.
+                    const data = part
+                        .split('\n')
+                        .filter(line => line.startsWith('data:'))
+                        .map(line => line.slice(5))
+                        .join('\n');
+                    if (data) appendToken(data);
                 }
             }
 
@@ -74,9 +78,12 @@ export function useStreamingChat({ onComplete } = {}) {
             const trailing = decoder.decode();
             if (trailing) buffer += trailing;
             if (buffer) {
-                for (const line of buffer.split('\n')) {
-                    if (line.startsWith('data:')) appendToken(line.slice(5));
-                }
+                const data = buffer
+                    .split('\n')
+                    .filter(line => line.startsWith('data:'))
+                    .map(line => line.slice(5))
+                    .join('\n');
+                if (data) appendToken(data);
             }
 
             finalize();
