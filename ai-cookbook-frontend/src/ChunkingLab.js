@@ -11,11 +11,11 @@ const ACCEPTED_TYPES = [
 ];
 
 const STRATEGIES = {
-    RECURSIVE:    { label: 'Recursive (LangChain4j)',    unit: 'chars',  desc: 'Hierarchical: paragraph → sentence → word → character. Best general-purpose strategy.' },
-    BY_PARAGRAPH: { label: 'By Paragraph (LangChain4j)', unit: 'chars',  desc: 'Splits on double newlines (\\n\\n). Good for well-structured documents.' },
-    BY_SENTENCE:  { label: 'By Sentence (LangChain4j)',  unit: 'chars',  desc: 'Splits at sentence boundaries. Good for narrative or prose text.' },
-    BY_WORD:      { label: 'By Word (LangChain4j)',       unit: 'chars',  desc: 'Splits at word boundaries. Guarantees no mid-word cuts.' },
-    TOKEN_TEXT:   { label: 'Token Text (Spring AI)',      unit: 'tokens', desc: 'Token-count based splitting — same algorithm used by the RAG pipeline. No overlap parameter.' },
+    RECURSIVE: { label: 'Recursive (LangChain4j)', unit: 'chars', desc: 'Hierarchical: paragraph → sentence → word → character. Best general-purpose strategy.' },
+    BY_PARAGRAPH: { label: 'By Paragraph (LangChain4j)', unit: 'chars', desc: 'Splits on double newlines (\\n\\n). Good for well-structured documents.' },
+    BY_SENTENCE: { label: 'By Sentence (LangChain4j)', unit: 'chars', desc: 'Splits at sentence boundaries. Good for narrative or prose text.' },
+    BY_WORD: { label: 'By Word (LangChain4j)', unit: 'chars', desc: 'Splits at word boundaries. Guarantees no mid-word cuts.' },
+    TOKEN_TEXT: { label: 'Token Text (Spring AI)', unit: 'tokens', desc: 'Token-count based splitting — same algorithm used by the RAG pipeline. No overlap parameter.' },
 };
 
 const ChunkingLab = () => {
@@ -44,7 +44,7 @@ const ChunkingLab = () => {
             setOverlap(100);
         }
         setResult(null);
-    }, [strategy]);
+    }, [isTokenStrategy]);
 
     const handleFile = (f) => {
         if (!f) return;
@@ -90,11 +90,10 @@ const ChunkingLab = () => {
     const collapseAll = () => setExpandedChunks(new Set());
     const allExpanded = result && result.chunks.length > 0 && expandedChunks.size === result.chunks.length;
 
-    const dropZoneClass = `border-2 border-dashed rounded-xl py-8 px-6 text-center select-none mb-4 transition-colors ${
-        dragOver
+    const dropZoneClass = `border-2 border-dashed rounded-xl py-8 px-6 text-center select-none mb-4 transition-colors ${dragOver
             ? 'border-indigo-500 bg-indigo-50 cursor-pointer'
             : 'border-indigo-300 bg-gray-50 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50'
-    }`;
+        }`;
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-6 text-left h-full overflow-y-auto">
@@ -231,11 +230,10 @@ const ChunkingLab = () => {
             <button
                 onClick={handleAnalyze}
                 disabled={!file || loading}
-                className={`w-full py-2.5 rounded-xl font-semibold text-sm transition-colors mb-3 ${
-                    !file || loading
+                className={`w-full py-2.5 rounded-xl font-semibold text-sm transition-colors mb-3 ${!file || loading
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer'
-                }`}
+                    }`}
             >
                 {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -275,12 +273,12 @@ const ChunkingLab = () => {
                     {/* Stat tiles */}
                     <div className="grid grid-cols-3 gap-3 mb-5">
                         {[
-                            { label: 'Total Chunks',       value: result.totalChunks.toLocaleString() },
-                            { label: '~Total Tokens',      value: result.totalEstimatedTokens.toLocaleString() },
-                            { label: 'Total Chars',        value: result.totalChars.toLocaleString() },
-                            { label: 'Avg Chars / Chunk',  value: result.avgCharsPerChunk.toFixed(1) },
-                            { label: '~Avg Tokens / Chunk',value: result.avgEstimatedTokensPerChunk.toFixed(1) },
-                            { label: 'Min / Max Chars',    value: `${result.minChunkChars} / ${result.maxChunkChars}` },
+                            { label: 'Total Chunks', value: result.totalChunks.toLocaleString() },
+                            { label: '~Total Tokens', value: result.totalEstimatedTokens.toLocaleString() },
+                            { label: 'Total Chars', value: result.totalChars.toLocaleString() },
+                            { label: 'Avg Chars / Chunk', value: result.avgCharsPerChunk.toFixed(1) },
+                            { label: '~Avg Tokens / Chunk', value: result.avgEstimatedTokensPerChunk.toFixed(1) },
+                            { label: 'Min / Max Chars', value: `${result.minChunkChars} / ${result.maxChunkChars}` },
                         ].map(({ label, value }) => (
                             <div key={label} className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3">
                                 <div className="text-lg font-bold text-indigo-700">{value}</div>
