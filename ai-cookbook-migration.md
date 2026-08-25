@@ -1,6 +1,6 @@
 ## Plan: Spring Boot to Python Backend Migration
 
-Migrate the Java backend in incremental slices to a FastAPI service while keeping the current frontend and PostgreSQL/pgvector data plane intact. Use a strangler pattern so production risk stays low, prioritize endpoint parity for active UI paths first, and target Anthropic-only in release 1 (with architecture ready for later Ollama add-on).
+Migrate the Java backend in incremental slices to a FastAPI service while keeping the current frontend and PostgreSQL/pgvector data plane intact. Use a strangler pattern so production risk stays low, prioritize endpoint parity for active UI paths first, and use Anthropic as the supported chat provider for both implementations.
 
 **Steps**
 1. Phase 0 - Baseline and contract freeze
@@ -11,10 +11,10 @@ Migrate the Java backend in incremental slices to a FastAPI service while keepin
 
 2. Phase 1 - Python foundation and shared infrastructure
 2.1 Create Python service skeleton with FastAPI, Uvicorn/Gunicorn, Pydantic settings, SQLAlchemy, Alembic, psycopg/pgvector, and structured logging.
-2.2 Implement config profile model aligned to existing YAML/env behavior from [ai-cookbook-java-backend/src/main/resources/application.yaml](ai-cookbook-java-backend/src/main/resources/application.yaml) and [ai-cookbook-java-backend/src/main/resources/application-anthropic.yaml](ai-cookbook-java-backend/src/main/resources/application-anthropic.yaml).
+2.2 Implement configuration aligned to the Anthropic defaults in [ai-cookbook-java-backend/src/main/resources/application.yaml](ai-cookbook-java-backend/src/main/resources/application.yaml).
 2.3 Mirror CORS and multipart limits from [ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/config/WebConfig.java](ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/config/WebConfig.java).
 2.4 Reuse existing PostgreSQL database and pgvector extension; keep schema compatible with V1/V2/V3 migrations in [ai-cookbook-java-backend/src/main/resources/db/migration](ai-cookbook-java-backend/src/main/resources/db/migration).
-2.5 Stand up Anthropic chat provider abstraction first; define provider interface so Ollama can be added without API refactor.
+2.5 Stand up Anthropic chat provider abstraction first; retain the interface so a future provider can be introduced without API refactor.
 
 3. Phase 2 - Data/model parity and persistence adapters
 3.1 Port relational models and repositories for document metadata, conversations, and product catalog based on [ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/model](ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/model) and [ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/repository](ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/repository).
@@ -60,8 +60,7 @@ Migrate the Java backend in incremental slices to a FastAPI service while keepin
 **Relevant files**
 - /Users/462760/IdeaProjects/the-ai-cookbook/CLAUDE.md - Source-of-truth feature map, endpoint inventory, and architecture notes to preserve.
 - /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/build.gradle - Dependency map to translate into Python libraries.
-- /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/application.yaml - Default runtime config (Ollama defaults, DB, vector settings, multipart).
-- /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/application-anthropic.yaml - Anthropic profile values and model configuration.
+- /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/application.yaml - Anthropic runtime configuration, database, vector settings, and multipart limits.
 - /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/db/migration/V1__init_schema.sql - Base schema including vector_store and document metadata.
 - /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/db/migration/V2__add_conversation_memory.sql - Conversation memory schema.
 - /Users/462760/IdeaProjects/the-ai-cookbook/ai-cookbook-java-backend/src/main/resources/db/migration/V3__add_product_catalog.sql - Product relational + vector schema.
@@ -104,9 +103,9 @@ Migrate the Java backend in incremental slices to a FastAPI service while keepin
 **Decisions**
 - Chosen framework: FastAPI.
 - Chosen rollout model: Strangler pattern with side-by-side Java and Python.
-- Chosen provider scope for release 1: Anthropic only.
+- Chosen provider scope: Anthropic only for both current backend implementations.
 - Included scope: full backend feature parity for endpoints listed in CLAUDE.md plus chunking lab endpoint.
-- Excluded from release 1: Ollama runtime parity; it is intentionally deferred behind provider abstraction.
+- Excluded scope: alternative chat-provider runtime support; any future provider must be introduced as an explicit product decision.
 
 **Further Considerations**
 1. Embedding parity risk: decide whether to match Java ONNX embeddings exactly or accept controlled drift using sentence-transformers defaults.

@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from app.config import Settings
 from app.routers.support import extract_entities, generate_chat_text, stream_text, tool_response
@@ -76,3 +77,8 @@ def test_ingestion_adapts_chunk_size_to_document_length():
     assert len(tiny_chunks) >= 2
     assert len(large_chunks) >= 3
     assert len(tiny_chunks[0]) < len(large_chunks[0])
+
+
+def test_settings_reject_unsupported_chat_provider():
+    with pytest.raises(ValidationError):
+        Settings(AI_CHAT_PROVIDER="ollama")

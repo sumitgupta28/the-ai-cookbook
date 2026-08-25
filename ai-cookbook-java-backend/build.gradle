@@ -6,7 +6,7 @@ plugins {
 
 group = 'in.ai'
 version = '0.0.1-SNAPSHOT'
-description = 'Your friendly personal assistant powered by Ollama (default) or Anthropic'
+description = 'Your friendly personal assistant powered by Anthropic'
 
 java {
 	toolchain {
@@ -32,7 +32,6 @@ ext {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
 	implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
 	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
 

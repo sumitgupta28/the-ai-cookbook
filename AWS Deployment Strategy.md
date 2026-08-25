@@ -46,8 +46,7 @@ EKS has no free tier — the control plane alone costs $0.10/hour ($72+/month). 
 
 | Profile | Provider | Auth | Free? |
 |---|---|---|---|
-| `default` | Ollama | local only | n/a — won't fit on t2.micro (1 GB RAM) |
-| `anthropic` | Anthropic API | `ANTHROPIC_API_KEY` env var | Pay-per-token |
+| `default` | Anthropic API | `ANTHROPIC_API_KEY` env var | Pay-per-token |
 | `bedrock` | Amazon Bedrock | EC2 IAM instance profile | Pay-per-token; $200 credits |
 
 **Recommended for AWS:** `bedrock` profile. No external API keys — the EC2 instance authenticates automatically via its IAM role.

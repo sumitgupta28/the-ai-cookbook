@@ -9,10 +9,10 @@ const TOOLS = [
         category: 'Calculator',
         icon: '🧮',
         items: [
-            { name: 'add',      desc: 'Sum two numbers',           example: 'What is 237 plus 489?' },
+            { name: 'add', desc: 'Sum two numbers', example: 'What is 237 plus 489?' },
             { name: 'subtract', desc: 'Difference of two numbers', example: 'What is 1000 minus 337?' },
-            { name: 'multiply', desc: 'Product of two numbers',    example: 'What is 42 multiplied by 17?' },
-            { name: 'divide',   desc: 'Quotient of two numbers',   example: 'Divide 144 by 12.' },
+            { name: 'multiply', desc: 'Product of two numbers', example: 'What is 42 multiplied by 17?' },
+            { name: 'divide', desc: 'Quotient of two numbers', example: 'Divide 144 by 12.' },
         ],
     },
     {
@@ -33,9 +33,9 @@ const TOOLS = [
 
 const ToolAgent = () => {
     const [messages, setMessages] = useState([]);
-    const [input, setInput]       = useState('');
-    const [loading, setLoading]   = useState(false);
-    const chatboxRef              = useRef(null);
+    const [input, setInput] = useState('');
+    const [loading, setLoading] = useState(false);
+    const chatboxRef = useRef(null);
 
     useEffect(() => {
         if (chatboxRef.current) {
@@ -62,7 +62,7 @@ const ToolAgent = () => {
                 ...prev,
                 {
                     id: crypto.randomUUID(),
-                    text: 'Error: could not reach the tool agent. Make sure the backend is running with the Anthropic profile (--spring.profiles.active=anthropic).',
+                    text: 'Error: could not reach the tool agent. Make sure the backend is running and ANTHROPIC_API_KEY is configured.',
                     sender: 'ai',
                 },
             ]);
@@ -106,15 +106,15 @@ const ToolAgent = () => {
                     </div>
                 ))}
 
-                {/* Profile warning — always visible */}
+                {/* Provider requirement */}
                 <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
-                        <p className="text-xs font-semibold text-amber-700 mb-1">Requires Anthropic profile</p>
+                        <p className="text-xs font-semibold text-amber-700 mb-1">Requires Anthropic</p>
                         <p className="text-xs text-amber-600 leading-relaxed">
-                            Tool calling is not supported by Ollama. Start the backend with:
+                            Tool calling uses the configured Anthropic API key.
                         </p>
                         <code className="block text-xs text-amber-800 bg-amber-100 rounded mt-1.5 px-2 py-1 break-all">
-                            --spring.profiles.active=anthropic
+                            ANTHROPIC_API_KEY=sk-ant-...
                         </code>
                     </div>
                 </div>
@@ -155,11 +155,10 @@ const ToolAgent = () => {
                                 <img src="/ai-assistant.png" alt="AI" className="w-10 h-10 rounded-full mr-2.5 flex-shrink-0" />
                             )}
                             <div
-                                className={`max-w-[80%] px-3 py-2.5 rounded-xl text-base leading-relaxed break-words my-1.5 ${
-                                    msg.sender === 'user'
+                                className={`max-w-[80%] px-3 py-2.5 rounded-xl text-base leading-relaxed break-words my-1.5 ${msg.sender === 'user'
                                         ? 'bg-indigo-500 text-white'
                                         : 'bg-gray-200 text-black'
-                                }`}
+                                    }`}
                             >
                                 {msg.text}
                             </div>

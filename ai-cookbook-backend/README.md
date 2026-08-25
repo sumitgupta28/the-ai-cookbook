@@ -1,6 +1,6 @@
-# AI Cookbook Backend
+# AI Cookbook Python Backend
 
-Python backend scaffold for phased migration from Spring Boot.
+FastAPI implementation of the AI Cookbook API, deployed alongside the Spring Boot backend during the migration. It is Anthropic-only and shares PostgreSQL/pgvector with the Java service.
 
 ## Quick start
 
@@ -55,8 +55,8 @@ From the repository root, start PostgreSQL/pgvector, Java, Python, and the UI:
 
 The Java service remains available on `http://localhost:8080`; the Python service
 is available on `http://localhost:8000`. The React UI continues to use the Java
-base URL by default, so traffic can be switched deliberately during the strangler
- rollout with `REACT_APP_API_BASE_URL`.
+base URL by default. Start it with `REACT_APP_API_BASE_URL=http://localhost:8000`
+to route requests to this backend.
 
 ## Database migration tooling (Alembic)
 
@@ -68,12 +68,10 @@ alembic upgrade head
 
 ## Scope now
 
-- Phase 0 artifacts are under phase0/
-- Foundation is under app/ and alembic/
 - Persistence layer is under app/models, app/repositories, and app/vector
 - Service/dto wiring is under app/services and app/schemas
 - Alembic parity migrations (V1/V2/V3) are under alembic/versions
 - Screen-specific routes are under app/routers/chat.py, rag.py, memory.py, documents.py, products.py, tools.py, structured.py, and chunking.py
 - Shared router helpers are under app/routers/support.py
 - Side-by-side container definition is in ../docker-compose.yaml
-- Anthropic-first provider scope is preserved for release 1
+- `AI_CHAT_PROVIDER` is restricted to `anthropic`; set `ANTHROPIC_API_KEY` before starting the service

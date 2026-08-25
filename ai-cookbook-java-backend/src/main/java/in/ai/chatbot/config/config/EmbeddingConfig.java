@@ -14,7 +14,6 @@ public class EmbeddingConfig {
     /**
      * Configure TransformersEmbeddingModel as the primary embedding model.
      * Uses all-MiniLM-L6-v2 ONNX model (384 dimensions) from HuggingFace.
-     * This prevents OllamaEmbeddingModel from being auto-configured.
      */
     @Bean
     @Primary

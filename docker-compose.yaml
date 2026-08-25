@@ -24,8 +24,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-default}
-      - SPRING_AI_OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - SPRING_DATASOURCE_URL=jdbc:postgresql://pgvector:5432/ragdb
       - SPRING_DATASOURCE_USERNAME=postgres

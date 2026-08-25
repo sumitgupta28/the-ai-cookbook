@@ -1,6 +1,6 @@
-# The AI Cookbook — Spring Boot + React
+# The AI Cookbook
 
-A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation (RAG), conversation memory, semantic search, function-calling tools, and structured output extraction — all built on **Spring AI 1.1.4** and **React 18**.
+A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation (RAG), conversation memory, semantic search, function-calling tools, and structured output extraction. It provides endpoint-compatible **Spring Boot** and **FastAPI** backends, both using Anthropic and the same PostgreSQL/pgvector data plane.
 
 ---
 
@@ -21,18 +21,15 @@ A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation
 
 ## Tech Stack
 
-### Backend
+### Backends
 | Layer | Technology |
 |---|---|
-| Framework | Spring Boot 3.5 |
-| AI / LLM | Spring AI 1.1.4 |
-| LLM providers | Ollama (default) · Anthropic Claude (via profile) |
-| Embeddings | ONNX `all-MiniLM-L6-v2` via `spring-ai-transformers` (384-dim, runs locally) |
+| Java | Spring Boot 3.5 + Spring AI 1.1.4 (port 8080) |
+| Python | FastAPI + Anthropic SDK (port 8000) |
+| LLM provider | Anthropic Claude |
+| Embeddings | 384-dimensional local embeddings |
 | Vector store | PostgreSQL + pgvector extension |
-| Document parsing | Apache Tika (PDF, DOCX, TXT) |
-| ORM | Spring Data JPA + Flyway migrations |
-| Language | Java 17 · Lombok |
-| Build | Gradle 8 |
+| Persistence | Spring Data JPA/Flyway and SQLAlchemy/Alembic |
 
 ### Frontend
 | Layer | Technology |
@@ -45,7 +42,8 @@ A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation
 ### Infrastructure
 | Service | Image | Port |
 |---|---|---|
-| Spring Boot backend | Custom Dockerfile (multi-stage) | 8080 |
+| Java backend | Custom Dockerfile (multi-stage) | 8080 |
+| Python backend | Custom Dockerfile | 8000 |
 | React UI | Custom Dockerfile (Node → nginx) | 3000 |
 | PostgreSQL + pgvector | `pgvector/pgvector:pg17` | 5432 |
 
@@ -56,11 +54,11 @@ A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation
 | Tool | Version | Notes |
 |---|---|---|
 | Docker + Docker Compose | latest | Required for PGVector; optional for full-stack run |
-| Java JDK | 17 | Only for running backend outside Docker |
+| Java JDK | 21 | Only for running the Java backend outside Docker |
 | Gradle | 8+ | Wrapper included (`./gradlew`) |
+| Python | 3.12+ | Only for running the Python backend outside Docker |
 | Node.js | 18+ | Only for running frontend outside Docker |
-| Ollama | latest | Required for the **default** LLM profile |
-| Anthropic API key | — | Required only for `anthropic` profile |
+| Anthropic API key | — | Required by both backends |
 
 ---
 
@@ -68,17 +66,9 @@ A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation
 
 ### Option A — Full stack via Docker Compose
 
-**With Ollama (default)** — Ollama must be running on your host at port 11434:
 ```bash
 cp .env.example .env
-docker compose up --build
-```
-
-**With Anthropic Claude:**
-```bash
-cp .env.example .env
-# Edit .env — set ANTHROPIC_API_KEY
-SPRING_PROFILES_ACTIVE=anthropic ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
+ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -92,17 +82,23 @@ Open [http://localhost:3000](http://localhost:3000).
 docker compose up pgvector -d
 ```
 
-**2. Start the backend:**
+**2. Start one backend:**
 ```bash
-  cd ai-cookbook-java-backend
-
-# Default (Ollama)
-./gradlew bootRun
-
-# Anthropic profile
-ANTHROPIC_API_KEY=sk-ant-... ./gradlew bootRun --args='--spring.profiles.active=anthropic'
+cd ai-cookbook-java-backend
+ANTHROPIC_API_KEY=sk-ant-... ./gradlew bootRun
 ```
-Backend starts on [http://localhost:8080](http://localhost:8080).
+
+Or start the Python implementation:
+
+```bash
+cd ai-cookbook-backend
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+ANTHROPIC_API_KEY=sk-ant-... python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The Java backend starts on [http://localhost:8080](http://localhost:8080); the Python backend starts on [http://localhost:8000](http://localhost:8000).
 
 **3. Start the frontend:**
 ```bash
@@ -111,6 +107,8 @@ npm install
 npm start
 ```
 Frontend starts on [http://localhost:3000](http://localhost:3000).
+
+The frontend targets Java by default. To target Python, start it with `REACT_APP_API_BASE_URL=http://localhost:8000 npm start`.
 
 > **First run note:** The ONNX embedding model (`all-MiniLM-L6-v2`, ~90 MB) is downloaded from HuggingFace on first startup. Subsequent starts use the cached copy.
 
@@ -122,33 +120,27 @@ Copy `.env.example` to `.env` and set the values you need.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `ANTHROPIC_API_KEY` | Only for `anthropic` profile | — | Your Anthropic API key |
-| `SPRING_PROFILES_ACTIVE` | No | `default` (Ollama) | Set to `anthropic` to use Anthropic Claude |
-| `OLLAMA_BASE_URL` | No | `http://host.docker.internal:11434` | Override Ollama URL when running in Docker |
+| `ANTHROPIC_API_KEY` | Yes | — | Anthropic API key used by both backends |
+| `REACT_APP_API_BASE_URL` | No | `http://localhost:8080` | Set to `http://localhost:8000` to target Python |
 
 Database credentials (`SPRING_DATASOURCE_*`) are set automatically by Docker Compose. Override them if connecting to an external PostgreSQL instance.
 
 ---
 
-## AI Model Profiles
+## AI Provider
 
-The active LLM provider is selected at startup via `spring.profiles.active`. Embeddings always use the local ONNX model regardless of which chat profile is active.
+Both backends use Anthropic Claude and require `ANTHROPIC_API_KEY`. The Java implementation configures `spring.ai.model.chat: anthropic` in `application.yaml`; the Python implementation only accepts `AI_CHAT_PROVIDER=anthropic`.
 
-| Profile | LLM | Config file | Required |
-|---|---|---|---|
-| *(default)* | Ollama `llama3.2` | `application.yaml` | Ollama at port 11434 |
-| `anthropic` | Anthropic `claude-sonnet-4-6` | `application-anthropic.yaml` | `ANTHROPIC_API_KEY` |
-
-> The **Tool Agent** and **Structured Output** tabs require the `anthropic` profile — they use function-calling and structured JSON output features that depend on the Anthropic API.
+The **Tool Agent** and **Structured Output** tabs use Anthropic function-calling and structured JSON output.
 
 ---
 
 ## API Reference
 
 ### Base URL
-```
-http://localhost:8080
-```
+Java: `http://localhost:8080` (default frontend target)
+
+Python: `http://localhost:8000` (set `REACT_APP_API_BASE_URL` to select it)
 
 ### Quick endpoint map
 
@@ -201,9 +193,12 @@ the-ai-cookbook/
 │   └── src/main/
 │       ├── java/in/ai/chatbot/      # Controllers, services, config, models
 │       └── resources/
-│           ├── application.yaml             # Default (Ollama)
-│           ├── application-anthropic.yaml   # Anthropic profile
+│           ├── application.yaml             # Anthropic configuration
 │           └── db/migration/                # Flyway migrations (V1–V3)
+│
+├── ai-cookbook-backend/             # FastAPI endpoint-compatible backend
+│   ├── app/                         # Routers, services, providers, persistence
+│   └── alembic/                     # Schema-parity migrations
 │
 ├── ai-cookbook-frontend/            # React frontend
 │   ├── package.json
@@ -302,7 +297,7 @@ Upload it via the **Product Search** tab. The XLS column contract is:
 
 ## Deployment
 
-An AWS free-tier deployment architecture (ECS, RDS PostgreSQL, S3 + CloudFront, Amazon Bedrock) is fully documented in [AWS Deployment Strategy.md](AWS%20Deployment%20Strategy.md). It covers Terraform infrastructure, GitHub Actions CI/CD pipelines, and the Bedrock Spring profile needed to replace Ollama in the cloud.
+An AWS free-tier deployment architecture (ECS, RDS PostgreSQL, S3 + CloudFront, Amazon Bedrock) is fully documented in [AWS Deployment Strategy.md](AWS%20Deployment%20Strategy.md). It covers Terraform infrastructure, GitHub Actions CI/CD pipelines, and an optional Bedrock Spring profile for AWS deployments.
 
 ---
 

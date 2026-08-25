@@ -4,27 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository layout
 
-Two independently deployable services:
+Two independently deployable backends share a React frontend and PostgreSQL/pgvector data plane:
 
 ```
-ai-cookbook-java-backend/ # Spring Boot 3.5 + Spring AI 1.1.4 backend
+ai-cookbook-java-backend/ # Spring Boot 3.5 + Spring AI 1.1.4 backend (port 8080)
+ai-cookbook-backend/      # FastAPI backend (port 8000)
 ai-cookbook-frontend/     # React 18 frontend (Create React App)
 docker-compose.yaml       # Orchestrates all services (backend, frontend, PGVector)
 ```
 
-## Backend — Spring Boot
+Both backend implementations use Anthropic for chat generation and share PostgreSQL/pgvector on port 5432. The React application defaults to the Java service and can target the Python service with `REACT_APP_API_BASE_URL=http://localhost:8000`.
+
+## Java Backend — Spring Boot
 
 All commands run from `ai-cookbook-java-backend/`.
 
 ```bash
-./gradlew bootRun                                             # default profile (Ollama)
-ANTHROPIC_API_KEY=sk-... ./gradlew bootRun --args='--spring.profiles.active=anthropic'
+ANTHROPIC_API_KEY=sk-... ./gradlew bootRun
 ./gradlew test                                               # run all tests
 ./gradlew test --tests "in.ai.chatbot.config.SomeTest"       # run a single test class
 ./gradlew bootJar                                            # build the fat JAR
 ```
 
 Listens on **port 8080**. Requires PostgreSQL (PGVector) on **port 5432** — start it via Docker Compose before running locally.
+
+## Python Backend — FastAPI
+
+All commands run from `ai-cookbook-backend/`.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
+ANTHROPIC_API_KEY=sk-... python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python3 -m pytest
+```
+
+Listens on **port 8000** and uses the same PostgreSQL/pgvector instance as the Java backend. Configuration is defined by Pydantic `Settings` in `app/config.py`; `AI_CHAT_PROVIDER` only accepts `anthropic`.
 
 ## Frontend — React
 
@@ -39,11 +55,7 @@ npm run build
 ## Docker Compose (full stack)
 
 ```bash
-# Ollama default (Ollama must be running on the host at port 11434)
-docker compose up --build
-
-# Anthropic profile
-SPRING_PROFILES_ACTIVE=anthropic ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
+ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
 
 # Start only PGVector (for local backend dev)
 docker compose up pgvector -d
@@ -51,18 +63,11 @@ docker compose up pgvector -d
 
 Copy `.env.example` → `.env` for environment variables.
 
-## AI model profiles
+## AI provider and embeddings
 
-The backend uses **Spring AI's `ChatModel` interface** — the active provider is selected via `spring.ai.model.chat` in config.
+Both backends are Anthropic-only and require `ANTHROPIC_API_KEY`. The Java backend selects Anthropic through `spring.ai.model.chat: anthropic` in `application.yaml`; the Python backend creates `AnthropicChatProvider` through its provider factory.
 
-| Profile | Provider | Config file | Required env var |
-|---|---|---|---|
-| *(default)* | Ollama (local) | `application.yaml` | none — Ollama at `http://localhost:11434` |
-| `anthropic` | Anthropic Claude | `application-anthropic.yaml` | `ANTHROPIC_API_KEY` |
-
-Embeddings always use the local ONNX model (`all-MiniLM-L6-v2` via `spring-ai-transformers`) regardless of which chat profile is active.
-
-When adding a new provider, add its `spring-ai-starter-model-*` dependency to `build.gradle`, create an `application-<profile>.yaml` with `spring.ai.model.chat: <provider>`, and activate it via `--spring.profiles.active=<profile>`.
+Embeddings remain local and provider-independent: Java uses ONNX `all-MiniLM-L6-v2` through `spring-ai-transformers`; Python uses its embedding service with 384-dimensional vectors.
 
 ## API endpoints
 
@@ -95,11 +100,11 @@ The active RAG endpoint accepts per-request tuning parameters (all optional with
 - `GET /rag/memory/conversations/{conversationId}/messages` — returns stored messages for a conversation
 
 ### Tool-Augmented Chat — `ToolChatController`
-- `GET /tool/ai/chat/string` — chat with function-calling tools enabled; **requires Anthropic profile**
+- `GET /tool/ai/chat/string` — chat with function-calling tools enabled; uses Anthropic
   - Available tools: calculator (add/subtract/multiply/divide), `getCurrentDateTime`, `getWeather` (mock data for 7 cities)
 
 ### Structured Output — `StructuredOutputController`
-- `GET /structured/extract` — extracts named entities and returns typed JSON; **requires Anthropic profile**
+- `GET /structured/extract` — extracts named entities and returns typed JSON; uses Anthropic
   - Returns: `EntityExtractionResult` with fields: people, organizations, locations, dates, topics
 
 ### Product Search — `ProductController`
@@ -119,6 +124,8 @@ XLS column contract (first row = headers): `ProductID | Name | Category | Brand 
 
 ## Frontend tabs
 
+All components use `REACT_APP_API_BASE_URL` when set and otherwise target the Java backend at `http://localhost:8080`. Set it to `http://localhost:8000` to route the UI to the Python endpoint-compatible backend.
+
 | Tab | Component | Backend endpoint |
 |---|---|---|
 | 💬 Chat | `ChatBot.js` | `GET /ai/chat/string` |
@@ -133,10 +140,11 @@ XLS column contract (first row = headers): `ProductID | Name | Category | Brand 
 ## Key architecture notes
 
 - **Two chat controllers**: `ChatController` calls the LLM directly with no document context. `RagChatController` calls `RagService.buildRagContext()` first to inject relevant document chunks as a system prompt before every LLM call.
+- **Two backend implementations**: Java owns the Spring AI implementation under `ai-cookbook-java-backend/`; Python provides endpoint-compatible FastAPI routers under `ai-cookbook-backend/app/routers/`. Both use the shared relational and vector schema while the frontend chooses a base URL at build/start time.
 - **Memory-augmented RAG**: `RagMemoryChatController` adds conversation memory on top of RAG. It uses a dedicated `memoryChatClient` bean wired with `MessageChatMemoryAdvisor`, which reads/writes history via `MessageWindowChatMemory` (last 20 messages). The conversation ID is passed per-request via the advisor param key `ChatMemory.CONVERSATION_ID` (`"chat_memory_conversation_id"`).
 - `RagService.buildRagContext(message, topK, similarityThreshold, mode)` performs a PGVector similarity search and builds the system prompt. The no-arg overload delegates to this using values from `RagProperties`.
 - `RagService.searchDocuments(query, topK, threshold)` is the raw search used by the Vector Search tab — returns matched chunks with similarity scores computed as `1 - distance`.
-- `EmbeddingConfig` defines `TransformersEmbeddingModel` as `@Primary`, which prevents `OllamaEmbeddingModel` from being auto-configured. The ONNX model (`all-MiniLM-L6-v2`, 384 dims) is downloaded from HuggingFace on first use (~90 MB); subsequent starts use the cached copy.
+- `EmbeddingConfig` defines `TransformersEmbeddingModel` as `@Primary`. The ONNX model (`all-MiniLM-L6-v2`, 384 dims) is downloaded from HuggingFace on first use (~90 MB); subsequent starts use the cached copy.
 - `IngestionService` uses `TikaDocumentReader` (Apache Tika — handles PDF, DOCX, TXT) → `TokenTextSplitter` → `VectorStore`. Document metadata is also persisted to the `document_metadata` table in PostgreSQL.
 - Deletion removes rows from both `vector_store` (filtered by `metadata->>'filename'`) and `document_metadata`.
 - `WebConfig` is the only CORS configuration; update `allowedOrigins` if the frontend URL changes (currently restricted to `http://localhost:3000`).
@@ -213,6 +221,21 @@ New files added for product search:
     ├── ProductIngestionService.java     # Apache POI XLS parsing → upsert product + embed into product_vector_store
     └── ProductSearchService.java        # similarity search on product_vector_store → ProductInfo list
 ```
+
+## Python package structure
+
+```
+app/
+├── config.py                 # Pydantic environment settings
+├── main.py                   # FastAPI application and lifespan setup
+├── providers/                # ChatProvider protocol and Anthropic implementation
+├── routers/                  # Endpoint-compatible chat, RAG, memory, document, product, tool, structured, and chunking routes
+├── services/                 # RAG, ingestion, embeddings, memory, and product orchestration
+├── models/ and repositories/ # SQLAlchemy persistence layer
+└── vector/                   # pgvector access helpers
+```
+
+Alembic migrations in `ai-cookbook-backend/alembic/versions/` maintain parity with the shared document, conversation, product, and vector schema.
 
 ## Product catalog database
 

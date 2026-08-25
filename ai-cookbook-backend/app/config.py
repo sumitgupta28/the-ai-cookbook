@@ -22,9 +22,7 @@ class Settings(BaseSettings):
     app_cors_origins: str = Field(default="http://localhost:3000", alias="APP_CORS_ORIGINS")
     app_max_upload_mb: int = Field(default=50, alias="APP_MAX_UPLOAD_MB")
 
-    ai_chat_provider: Literal["anthropic", "ollama"] = Field(
-        default="anthropic", alias="AI_CHAT_PROVIDER"
-    )
+    ai_chat_provider: Literal["anthropic"] = Field(default="anthropic", alias="AI_CHAT_PROVIDER")
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")
     anthropic_model: str = Field(default="claude-sonnet-4-6", alias="ANTHROPIC_MODEL")
     anthropic_temperature: float = Field(default=0.7, alias="ANTHROPIC_TEMPERATURE")
