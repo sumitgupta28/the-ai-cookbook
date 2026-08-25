@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   pgvector:
     image: pgvector/pgvector:pg17
@@ -32,6 +30,30 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://pgvector:5432/ragdb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  python-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_PROFILE=${APP_PROFILE:-local}
+      - APP_CORS_ORIGINS=${APP_CORS_ORIGINS:-http://localhost:3000}
+      - AI_CHAT_PROVIDER=${AI_CHAT_PROVIDER:-anthropic}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_MODEL=${ANTHROPIC_MODEL:-claude-sonnet-4-6}
+      - ANTHROPIC_TEMPERATURE=${ANTHROPIC_TEMPERATURE:-0.7}
+      - DB_HOST=pgvector
+      - DB_PORT=5432
+      - DB_NAME=ragdb
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
     depends_on:
       pgvector:
         condition: service_healthy
