@@ -22,7 +22,7 @@ function App() {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <nav className="flex items-center gap-1 px-4 pt-3 bg-white border-b border-gray-200 flex-shrink-0">
-                <img src="/ai-chatbot-logo.png" alt="Chatbot Logo" className="h-10 mr-3" />
+                <img src="/ai-cookbook-logo.png" alt="AI Cookbook Logo" className="h-10 mr-3" />
                 <div className="flex items-center gap-1">
                     <button className={tabClass('chat')} onClick={() => setTab('chat')}>
                         💬 Chat

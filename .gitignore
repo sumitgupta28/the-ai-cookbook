@@ -1,12 +1,12 @@
 # Spring Boot / Gradle
-spring-boot-ai-chatbot/.gradle/
-spring-boot-ai-chatbot/build/
-spring-boot-ai-chatbot/out/
-!spring-boot-ai-chatbot/gradle/wrapper/gradle-wrapper.jar
+ai-cookbook-java-backend/.gradle/
+ai-cookbook-java-backend/build/
+ai-cookbook-java-backend/out/
+!ai-cookbook-java-backend/gradle/wrapper/gradle-wrapper.jar
 
 # React
-chatbot-ui/node_modules/
-chatbot-ui/build/
+ai-cookbook-frontend/node_modules/
+ai-cookbook-frontend/build/
 
 # Environment
 .env

@@ -48,7 +48,7 @@ async def lifespan(application: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0",
-    description="Python backend foundation for Spring Boot migration",
+    description="The AI Cookbook backend API",
     lifespan=lifespan,
 )
 

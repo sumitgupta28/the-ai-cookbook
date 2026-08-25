@@ -1,4 +1,4 @@
-# backend
+# AI Cookbook Backend
 
 Python backend scaffold for phased migration from Spring Boot.
 
@@ -69,11 +69,11 @@ alembic upgrade head
 ## Scope now
 
 - Phase 0 artifacts are under phase0/
-- Phase 1 foundation is under app/ and alembic/
+- Foundation is under app/ and alembic/
 - Persistence layer is under app/models, app/repositories, and app/vector
 - Service/dto wiring is under app/services and app/schemas
 - Alembic parity migrations (V1/V2/V3) are under alembic/versions
 - Screen-specific routes are under app/routers/chat.py, rag.py, memory.py, documents.py, products.py, tools.py, structured.py, and chunking.py
-- Shared migrated handler logic is under app/routers/compat.py
+- Shared router helpers are under app/routers/support.py
 - Side-by-side container definition is in ../docker-compose.yaml
 - Anthropic-first provider scope is preserved for release 1

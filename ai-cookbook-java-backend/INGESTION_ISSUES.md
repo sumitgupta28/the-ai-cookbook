@@ -288,7 +288,7 @@ logging:
 
 ## Files Modified
 
-- ✅ `/spring-boot-ai-chatbot/src/main/java/in/ai/chatbot/config/service/IngestionService.java`
+- ✅ `/ai-cookbook-java-backend/src/main/java/in/ai/chatbot/config/service/IngestionService.java`
   - Added content validation
   - Added chunk validation  
   - Added VectorStore.add() error handling

@@ -216,7 +216,7 @@ DELETE FROM vector_store WHERE metadata->>'filename' = 'document.pdf';
 
 ### PostgreSQL Schema
 
-**Tables Created by `/spring-boot-ai-chatbot/src/main/resources/db/migration/V1__init_schema.sql`:**
+**Tables Created by `/ai-cookbook-java-backend/src/main/resources/db/migration/V1__init_schema.sql`:**
 
 ```sql
 -- Embeddings storage (created by Spring AI)

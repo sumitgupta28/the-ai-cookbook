@@ -15,7 +15,7 @@ claude --version   # verify
 chmod +x tools/generate-tests.sh
 
 ./tools/generate-tests.sh \
-  spring-boot-ai-chatbot/src/main/java/in/ai/chatbot/service/RagService.java
+  ai-cookbook-java-backend/src/main/java/in/ai/chatbot/service/RagService.java
 # → writes RagServiceTest.java alongside the source
 ```
 
@@ -29,7 +29,7 @@ The generated test class uses:
 ```bash
 chmod +x tools/generate-react-tests.sh
 
-./tools/generate-react-tests.sh chatbot-ui/src/components/RAGChatbot.js
+./tools/generate-react-tests.sh ai-cookbook-frontend/src/components/RAGChatbot.js
 # → writes RAGChatbot.test.js in the same directory
 ```
 

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         populate_by_name=True,
     )
 
-    app_name: str = Field(default="Spring to Python Backend", alias="APP_NAME")
+    app_name: str = Field(default="The AI Cookbook", alias="APP_NAME")
     app_env: str = Field(default="local", alias="APP_ENV")
     app_profile: str = Field(default="local", alias="APP_PROFILE")
     app_host: str = Field(default="0.0.0.0", alias="APP_HOST")

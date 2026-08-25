@@ -7,14 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Two independently deployable services:
 
 ```
-spring-boot-ai-chatbot/   # Spring Boot 3.5 + Spring AI 1.1.4 backend
-chatbot-ui/               # React 18 frontend (Create React App)
+ai-cookbook-java-backend/ # Spring Boot 3.5 + Spring AI 1.1.4 backend
+ai-cookbook-frontend/     # React 18 frontend (Create React App)
 docker-compose.yaml       # Orchestrates all services (backend, frontend, PGVector)
 ```
 
 ## Backend — Spring Boot
 
-All commands run from `spring-boot-ai-chatbot/`.
+All commands run from `ai-cookbook-java-backend/`.
 
 ```bash
 ./gradlew bootRun                                             # default profile (Ollama)
@@ -28,7 +28,7 @@ Listens on **port 8080**. Requires PostgreSQL (PGVector) on **port 5432** — st
 
 ## Frontend — React
 
-All commands run from `chatbot-ui/`.
+All commands run from `ai-cookbook-frontend/`.
 
 ```bash
 npm start    # dev server on port 3000

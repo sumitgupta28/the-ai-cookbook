@@ -1,4 +1,4 @@
-# AI Chatbot — Spring Boot + React
+# The AI Cookbook — Spring Boot + React
 
 A full-stack AI chatbot application demonstrating Retrieval-Augmented Generation (RAG), conversation memory, semantic search, function-calling tools, and structured output extraction — all built on **Spring AI 1.1.4** and **React 18**.
 
@@ -94,7 +94,7 @@ docker compose up pgvector -d
 
 **2. Start the backend:**
 ```bash
-cd spring-boot-ai-chatbot
+  cd ai-cookbook-java-backend
 
 # Default (Ollama)
 ./gradlew bootRun
@@ -106,7 +106,7 @@ Backend starts on [http://localhost:8080](http://localhost:8080).
 
 **3. Start the frontend:**
 ```bash
-cd chatbot-ui
+  cd ai-cookbook-frontend
 npm install
 npm start
 ```
@@ -194,8 +194,8 @@ For full endpoint contracts and implementation details, see [CLAUDE.md](CLAUDE.m
 ## Project Structure
 
 ```
-ai-chatbot-springboot-react/
-├── spring-boot-ai-chatbot/          # Java backend
+the-ai-cookbook/
+├── ai-cookbook-java-backend/        # Java backend
 │   ├── build.gradle
 │   ├── Dockerfile
 │   └── src/main/
@@ -205,7 +205,7 @@ ai-chatbot-springboot-react/
 │           ├── application-anthropic.yaml   # Anthropic profile
 │           └── db/migration/                # Flyway migrations (V1–V3)
 │
-├── chatbot-ui/                      # React frontend
+├── ai-cookbook-frontend/            # React frontend
 │   ├── package.json
 │   ├── Dockerfile
 │   └── src/
@@ -253,10 +253,10 @@ Generates JUnit 5 + Mockito test skeletons for Java files, or Jest + React Testi
 ```bash
 # Java
 ./tools/generate-tests.sh \
-  spring-boot-ai-chatbot/src/main/java/in/ai/chatbot/service/RagService.java
+  ai-cookbook-java-backend/src/main/java/in/ai/chatbot/service/RagService.java
 
 # React
-./tools/generate-react-tests.sh chatbot-ui/src/components/RAGChatbot.js
+./tools/generate-react-tests.sh ai-cookbook-frontend/src/components/RAGChatbot.js
 ```
 
 See [tools/README.md](tools/README.md) for full usage.
@@ -273,14 +273,14 @@ See [tools/README.md](tools/README.md) for full usage.
 
 ```bash
 # Backend
-cd spring-boot-ai-chatbot
+cd ai-cookbook-java-backend
 ./gradlew test
 
 # Run a single test class
 ./gradlew test --tests "in.ai.chatbot.service.SomeServiceTest"
 
 # Frontend
-cd chatbot-ui
+cd ai-cookbook-frontend
 npm test
 ```
 

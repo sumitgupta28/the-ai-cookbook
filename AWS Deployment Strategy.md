@@ -99,11 +99,11 @@ EKS has no free tier — the control plane alone costs $0.10/hour ($72+/month). 
 React components currently hardcode `http://localhost:8080`. For AWS:
 
 1. Replace with `process.env.REACT_APP_API_URL || 'http://localhost:8080'` in all axios calls.
-2. Add `chatbot-ui/.env.example`:
+2. Add `ai-cookbook-frontend/.env.example`:
    ```
    REACT_APP_API_URL=http://localhost:8080
    ```
-3. In `chatbot-ui/Dockerfile`, accept build arg:
+3. In `ai-cookbook-frontend/Dockerfile`, accept build arg:
    ```dockerfile
    ARG REACT_APP_API_URL=http://localhost:8080
    ENV REACT_APP_API_URL=$REACT_APP_API_URL

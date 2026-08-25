@@ -17,9 +17,9 @@ services:
     networks:
       - app-network
 
-  springboot-app:
+  ai-cookbook-java-backend:
     build:
-      context: ./spring-boot-ai-chatbot
+      context: ./ai-cookbook-java-backend
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
@@ -36,9 +36,9 @@ services:
     networks:
       - app-network
 
-  python-backend:
+  ai-cookbook-backend:
     build:
-      context: ./backend
+      context: ./ai-cookbook-backend
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
@@ -60,9 +60,9 @@ services:
     networks:
       - app-network
 
-  react-ui:
+  ai-cookbook-frontend:
     build:
-      context: ./chatbot-ui
+      context: ./ai-cookbook-frontend
       dockerfile: Dockerfile
     ports:
       - "3000:80"

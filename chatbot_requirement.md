@@ -523,7 +523,7 @@ const sendMessage = (text) => {
 ## 11. Project Structure (Python Backend)
 
 ```
-python-chatbot-backend/
+ai-cookbook-backend/
 ├── app/
 │   ├── main.py                    # FastAPI app, CORS, router registration
 │   ├── config.py                  # pydantic-settings — loads .env
@@ -552,7 +552,7 @@ python-chatbot-backend/
 ├── .env.example
 ├── requirements.txt
 ├── Dockerfile
-└── docker-compose.yaml            # Replaces springboot-app service with python-chatbot-backend
+└── docker-compose.yaml            # Replaces ai-cookbook-java-backend service with ai-cookbook-backend
 ```
 
 ---
@@ -593,7 +593,7 @@ python-multipart>=0.0.9     # FastAPI file upload support
 
 ## 13. Docker Compose (Updated)
 
-Replace the `springboot-app` service with `python-chatbot-backend`. Everything else (pgvector, react-ui, ports, volumes, network) stays the same.
+Use the `ai-cookbook-backend` service alongside `ai-cookbook-java-backend`. The frontend service is `ai-cookbook-frontend`; pgvector, ports, volumes, and network remain unchanged.
 
 ```yaml
 services:
@@ -610,8 +610,8 @@ services:
       interval: 10s
       retries: 5
 
-  python-chatbot-backend:
-    build: ./python-chatbot-backend
+  ai-cookbook-backend:
+    build: ./ai-cookbook-backend
     ports: ["8080:8080"]
     environment:
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
@@ -623,8 +623,8 @@ services:
         condition: service_healthy
     networks: [app-network]
 
-  react-ui:
-    build: ./chatbot-ui
+  ai-cookbook-frontend:
+    build: ./ai-cookbook-frontend
     ports: ["3000:3000"]
     environment:
       REACT_APP_API_BASE_URL: http://localhost:8080
